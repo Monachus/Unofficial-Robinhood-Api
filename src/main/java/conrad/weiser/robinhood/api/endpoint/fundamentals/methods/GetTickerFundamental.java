@@ -7,9 +7,9 @@ import conrad.weiser.robinhood.api.request.RequestMethod;
 
 public class GetTickerFundamental extends Fundamentals {
 	
-	public GetTickerFundamental(String ticker) {
+	public GetTickerFundamental(String uuid) {
 		
-		this.setUrlBase("https://api.robinhood.com/fundamentals/" + ticker +"/");
+		this.setUrlBase("https://api.robinhood.com/marketdata/fundamentals/" + uuid +"/");
 		
 		//Add the headers into the request
 		this.addHttpHeaderParameter(new HttpHeaderParameter("Accept", "appliation/json"));

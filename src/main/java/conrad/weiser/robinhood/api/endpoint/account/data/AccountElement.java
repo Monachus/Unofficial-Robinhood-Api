@@ -4,6 +4,18 @@ import java.net.URL;
 
 public class AccountElement {
 	
+	@Override
+	public String toString() {
+		return "AccountElement [deactivated=" + deactivated + ", margin_balances=" + margin_balances + ", portfolio="
+				+ portfolio + ", cash_balances=" + cash_balances + ", withdrawl_halted=" + withdrawl_halted
+				+ ", cash_available_for_withdrawl=" + cash_available_for_withdrawl + ", type=" + type + ", sma=" + sma
+				+ ", sweep_enabled=" + sweep_enabled + ", deposit_halted=" + deposit_halted + ", buying_power="
+				+ buying_power + ", user=" + user + ", max_ach_early_access_amount=" + max_ach_early_access_amount
+				+ ", cash_held_for_orders=" + cash_held_for_orders + ", only_position_closing_trades="
+				+ only_position_closing_trades + ", url=" + url + ", positions=" + positions + ", cash=" + cash
+				+ ", sma_held_for_orders=" + sma_held_for_orders + ", account_number=" + account_number
+				+ ", uncleared_deposits=" + uncleared_deposits + ", unsettled_funds=" + unsettled_funds + "]";
+	}
 	/**
 	 * Public class declaring the response structure for the api.robinhood.com/accounts/ endpoint
 	 * allowing Gson to turn the Json directly into this object

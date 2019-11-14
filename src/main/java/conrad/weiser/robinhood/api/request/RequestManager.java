@@ -1,14 +1,23 @@
 package conrad.weiser.robinhood.api.request;
 
-import com.google.gson.Gson;
-import conrad.weiser.robinhood.api.ApiMethod;
-import conrad.weiser.robinhood.api.parameters.HttpHeaderParameter;
-import conrad.weiser.robinhood.api.throwables.RobinhoodApiException;
-import okhttp3.*;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
+
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import conrad.weiser.robinhood.api.ApiMethod;
+import conrad.weiser.robinhood.api.parameters.HttpHeaderParameter;
+import conrad.weiser.robinhood.api.throwables.RobinhoodApiException;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Logger;
 
 
 public class RequestManager {
@@ -34,8 +43,20 @@ public class RequestManager {
 		return RequestManager.instance;
 	}
 
+	
 	public RequestManager(){
-		this.okClient = new OkHttpClient();
+		Logger logger=new Logger() {
+
+			@Override
+			public void log(String arg0) {
+				System.out.println("okhttp:"+arg0);
+			}
+			
+		};
+		HttpLoggingInterceptor logging = new HttpLoggingInterceptor(logger);
+		this.okClient= new OkHttpClient.Builder()
+				  .addInterceptor(logging)
+				  .build();
 	}
 
 	OkHttpClient okClient;
@@ -151,9 +172,24 @@ public class RequestManager {
 			Response response = okClient.newCall(builtRequest).execute();
 
 			//Parse the response with Gson
-			Gson gson = new Gson();
-			String responseJsonString = response.body().string();
 
+			GsonBuilder builder=new GsonBuilder();
+			ExclusionStrategy strategy=new ExclusionStrategy() {
+				
+				@Override
+				public boolean shouldSkipField(FieldAttributes f) {
+					return f.getName().equals("user");
+				}
+				
+				@Override
+				public boolean shouldSkipClass(Class<?> clazz) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+			};
+			builder.addDeserializationExclusionStrategy(strategy);
+			String responseJsonString = response.body().string();
+			Gson gson = builder.create();
 			T data = gson.fromJson(responseJsonString, method.getReturnType());
 
 			return data;

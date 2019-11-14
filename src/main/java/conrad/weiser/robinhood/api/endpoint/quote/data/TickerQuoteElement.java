@@ -3,6 +3,29 @@ package conrad.weiser.robinhood.api.endpoint.quote.data;
 /**
  * Created by SirensBell on 6/19/2017.
  */
+/*
+ *   "results":[ 
+      { 
+         "ask_price":"174.290000",
+         "ask_size":200,
+         "bid_price":"174.280000",
+         "bid_size":10500,
+         "last_trade_price":"174.310000",
+         "last_extended_hours_trade_price":"174.270000",
+         "previous_close":"172.550000",
+         "adjusted_previous_close":"172.550000",
+         "previous_close_date":"2019-10-24",
+         "symbol":"BABA",
+         "trading_halted":false,
+         "has_traded":true,
+         "last_trade_price_source":"consolidated",
+         "updated_at":"2019-10-25T22:19:45Z",
+         "instrument":"https://api.robinhood.com/instruments/b2e06903-5c44-46a4-bd42-2a696f9d68e1/"
+      }
+   ]
+}
+
+ */
 public class TickerQuoteElement {
 
 

@@ -18,6 +18,7 @@ import conrad.weiser.robinhood.api.endpoint.orders.methods.MakeMarketOrder;
 import conrad.weiser.robinhood.api.endpoint.orders.methods.MakeMarketStopOrder;
 import conrad.weiser.robinhood.api.endpoint.orders.throwables.InvalidTickerException;
 import conrad.weiser.robinhood.api.endpoint.quote.data.TickerQuoteElement;
+import conrad.weiser.robinhood.api.endpoint.quote.data.TickerQuoteResults;
 import conrad.weiser.robinhood.api.endpoint.quote.methods.GetTickerQuote;
 import conrad.weiser.robinhood.api.request.RequestStatus;
 import conrad.weiser.robinhood.api.throwables.RobinhoodApiException;
@@ -30,6 +31,7 @@ import conrad.weiser.robinhood.api.endpoint.account.data.AccountHolderInvestment
 import conrad.weiser.robinhood.api.endpoint.account.data.BasicAccountHolderInfoElement;
 import conrad.weiser.robinhood.api.endpoint.account.data.BasicUserInfoElement;
 import conrad.weiser.robinhood.api.endpoint.fundamentals.methods.GetTickerFundamental;
+import conrad.weiser.robinhood.api.endpoint.historical.data.HistoricalListElement;
 import conrad.weiser.robinhood.api.endpoint.orders.data.SecurityOrderElement;
 import conrad.weiser.robinhood.api.endpoint.orders.enums.OrderTransactionType;
 import conrad.weiser.robinhood.api.request.RequestManager;
@@ -270,17 +272,19 @@ public class RobinhoodApi {
 	
 	/**
 	 * Method returning a {@link TickerFundamentalElement} for the supplied ticker name
+	 * @throws RobinhoodNotLoggedInException 
 	 */
-	public TickerFundamentalElement getTickerFundamental(String ticker) throws RobinhoodApiException, TickerNotExistsException {
+	public TickerFundamentalElement getTickerFundamental(String uuid) throws RobinhoodApiException, TickerNotExistsException, RobinhoodNotLoggedInException {
 		
 
 		//Create the API method
-		ApiMethod method = new GetTickerFundamental(ticker);
+		ApiMethod method = new GetTickerFundamental(uuid);
+		method.addAuthTokenParameter();
 		TickerFundamentalElement element = requestManager.makeApiRequest(method);
 
 		//Verify that we got proper ticker data. If not, throw an error.
 		if(element.getInstrument() == null)
-			throw new TickerNotExistsException(ticker);
+			throw new TickerNotExistsException(uuid);
 
 		return element;
 
@@ -364,13 +368,16 @@ public class RobinhoodApi {
 	 * current asking price and the last trading price.
 	 * @param ticker Which symbol you are retrieving a quote for
 	 * @return
+	 * @throws RobinhoodNotLoggedInException 
 	 */
-	public TickerQuoteElement getQuoteByTicker(String ticker) throws RobinhoodApiException {
+	public TickerQuoteResults getQuoteByTicker(String ticker) throws RobinhoodApiException, RobinhoodNotLoggedInException {
 
 		//Create the API method
 		ApiMethod method = new GetTickerQuote(ticker);
+		method.addAuthTokenParameter();
 
-		return requestManager.makeApiRequest(method);
+		TickerQuoteResults response = requestManager.makeApiRequest(method);
+		return response;
 
 	}
 
@@ -385,12 +392,24 @@ public class RobinhoodApi {
 	public List<PositionElement> getAccountWatchlist() throws RobinhoodApiException, RobinhoodNotLoggedInException {
 
 		//Create the API method
-		ApiMethod method = new GetAccountPositions();
+		ApiMethod method = new GetAccountDefaultWatchList();
 		method.addAuthTokenParameter();
 
 		//Return the current account positions
 		PositionListElement response = requestManager.makeApiRequest(method);
 		return response.getPositionList();
+
+	}
+	
+	public HistoricalListElement getHistoricalData(String Symbol, String interval, String span) throws RobinhoodApiException, RobinhoodNotLoggedInException {
+
+		//Create the API method
+		ApiMethod method = new GetHistoricalData(Symbol, interval, span);
+		method.addAuthTokenParameter();
+
+		//Return the current account positions
+		HistoricalListElement response = requestManager.makeApiRequest(method);
+		return response;
 
 	}
 
@@ -402,24 +421,13 @@ public class RobinhoodApi {
 	 */
 	public List<PositionElement> getAccountPositions() throws RobinhoodApiException, RobinhoodNotLoggedInException {
 
-		//Get the entire watchlist for the account
-		List<PositionElement> accountWatchlist = this.getAccountWatchlist();
+		//Create the API method
+		ApiMethod method = new GetAccountPositions();
+		method.addAuthTokenParameter();
 
-		//Parse the watchlist for things which have a quantity more than one and return it
-		Vector<PositionElement> accountPositions = new Vector<>();
-
-		for(PositionElement currentWatchlistEntity : accountWatchlist) {
-
-			if(currentWatchlistEntity.getQuantity() >= 1) {
-
-				accountPositions.add(currentWatchlistEntity);
-			}
-		}
-
-		return accountPositions;
-
-
-
+		//Return the current account positions
+		PositionListElement response = requestManager.makeApiRequest(method);
+		return response.getPositionList();
 	}
 
 	/**
